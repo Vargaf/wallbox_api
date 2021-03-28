@@ -1,0 +1,25 @@
+version: "3.7"
+services:
+    web:
+        image: nginx:latest
+        ports:
+            - "8080:80"
+        volumes: 
+            - ../project:/project
+            - ../devops/site.conf:/etc/nginx/conf.d/default.conf
+        links: 
+            - php
+        networks: 
+            - wallbox
+
+    php:
+        build:
+            context: ../
+            dockerfile: ./devops/php/Dockerfile-php
+        volumes: 
+            - ../project:/project
+        networks: 
+            - wallbox
+
+networks: 
+    wallbox:
