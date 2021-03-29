@@ -71,7 +71,6 @@ class AmazonrepositoryTest extends TestCase {
         $this->assertUser($rawUserList[2], $userItems[0]);
         $this->assertUser($rawUserList[0], $userItems[1]);
 
-        $userFilter = new UserListFilterDTO();
         $userFilter->countries = [ 'ES', 'CN' ];
 
         $userList = $this->userRepository->findAll($userFilter);
@@ -81,6 +80,22 @@ class AmazonrepositoryTest extends TestCase {
         $this->assertUser($rawUserList[3], $userItems[0]);
         $this->assertUser($rawUserList[2], $userItems[1]);
         $this->assertUser($rawUserList[0], $userItems[2]);
+    }
+
+
+    public function testActivationLengthAndCountryFilter() {
+        $rawUserList = $this->orderElementsRepositoryProvider();
+        $this->populateUserRepository($rawUserList);
+
+        $userFilter = new UserListFilterDTO();
+        $userFilter->countries = [ 'ES' ];
+        $userFilter->activationLength = 2;
+
+        $userList = $this->userRepository->findAll($userFilter);
+        $userItems = $userList->toArray();
+
+        $this->assertCount(1, $userItems);
+        $this->assertUser($rawUserList[2], $userItems[0]);
     }
 
     private function assertUser(array $expectedUser, array $actualUser): void {
