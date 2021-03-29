@@ -3,7 +3,7 @@
 namespace Wallbox\Domain\Users\Application;
 
 use WallBox\Domain\Users\Model\UserList;
-use Wallbox\Domain\Users\Service\UserRepositoryInterface;
+use Wallbox\Domain\Users\Services\UserRepositoryInterface;
 
 class UserListUseCase {
 

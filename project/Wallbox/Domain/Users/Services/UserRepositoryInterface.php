@@ -1,6 +1,6 @@
 <?php
 
-namespace Wallbox\Domain\Users\Service;
+namespace Wallbox\Domain\Users\Services;
 
 use WallBox\Domain\Users\Model\UserList;
 

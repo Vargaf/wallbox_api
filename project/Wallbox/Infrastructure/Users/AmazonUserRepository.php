@@ -4,12 +4,21 @@ namespace Wallbox\Infrastructure\Users;
 
 use Wallbox\Domain\Users\Model\User;
 use Wallbox\Domain\Users\Model\UserList;
-use Wallbox\Domain\Users\Service\UserRepositoryInterface;
+use Wallbox\Domain\Users\Services\UserRepositoryInterface;
 
 class AmazonUserRepository implements UserRepositoryInterface {
 
     public function findAll(): UserList
     {
+        
+        $userArray = $this->getUserList();
+        $orderedUserList = $this->orderByNameAndSurname($userArray);
+        $userList = new UserList($orderedUserList);
+
+        return $userList;
+    }
+
+    protected function getUserList(): array {
         $data = file_get_contents("https://wallbox.s3-eu-west-1.amazonaws.com/img/test/users.csv");
         $rows = explode("\n",$data);
         $userArray = [];
@@ -27,10 +36,7 @@ class AmazonUserRepository implements UserRepositoryInterface {
             );
         }
 
-        $orderedUserList = $this->orderByNameAndSurname($userArray);
-        $userList = new UserList($orderedUserList);
-
-        return $userList;
+        return $userArray;
     }
 
     private function orderByNameAndSurname(array $userList): array {
