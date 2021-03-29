@@ -4,61 +4,95 @@ namespace Wallbox\Tests\Users;
 
 use PHPUnit\Framework\TestCase;
 use Wallbox\Domain\Users\Model\User;
+use Wallbox\Domain\Users\Model\UserListFilterDTO;
 
 class AmazonrepositoryTest extends TestCase {
 
     private AmazonUserRepositoryMock $userRepository;
 
-    private User $user0;
-    private User $user1;
-
     protected function setUp(): void {
         $this->userRepository = new AmazonUserRepositoryMock();
-
-        $this->user0 = new User(
-            0,
-            'Ey',
-            'Ey surname',
-            'ey_email@email.com',
-            'ES',
-            (new \DateTime('now'))->modify('-1 day'),
-            new \DateTime('now'),
-            0
-        );
-
-        $this->user1 = new User(
-            1,
-            'Bi',
-            'Bi surname',
-            'Bi_email@email.com',
-            'ES',
-            (new \DateTime('now'))->modify('-1 day'),
-            new \DateTime('now'),
-            1
-        );
     }
 
-    public function testEnvironment() {
-        $this->userRepository->addUser($this->user0);
-        $this->userRepository->addUser($this->user1);
+    protected function tearDown(): void
+    {
+        $this->userRepository->clear();
+    }
+
+    public function testOrderElements() {
+
+        $rawUserList = $this->orderElementsRepositoryProvider();
+        $this->populateUserRepository($rawUserList);
 
         $userList = $this->userRepository->findAll();
         $userItems = $userList->toArray();
 
-        $this->assertUser($this->user1, $userItems[0]);
-        $this->assertUser($this->user0, $userItems[1]);
+        $this->assertUser($rawUserList[3], $userItems[0]);
+        $this->assertUser($rawUserList[2], $userItems[1]);
+        $this->assertUser($rawUserList[1], $userItems[2]);
+        $this->assertUser($rawUserList[0], $userItems[3]);
 
     }
 
-    private function assertUser(User $user, array $userArray): void {
-        $this->assertEquals($user->id(), $userArray['id']);
-        $this->assertEquals($user->name(), $userArray['name']);
-        $this->assertEquals($user->surname(), $userArray['surname']);
-        $this->assertEquals($user->email(), $userArray['email']);
-        $this->assertEquals($user->country(), $userArray['country']);
-        $this->assertEquals($user->createAt()->getTimestamp(), $userArray['createAt']);
-        $this->assertEquals($user->activateAt()->getTimestamp(), $userArray['activateAt']);
-        $this->assertEquals($user->chargerId(), $userArray['chargerId']);
+    public function testFilterActivationLenght() {
+        $rawUserList = $this->orderElementsRepositoryProvider();
+        $this->populateUserRepository($rawUserList);
+
+        $userFilter = new UserListFilterDTO();
+        $userFilter->activationLength = 2;
+
+        $userList = $this->userRepository->findAll($userFilter);
+        $userItems = $userList->toArray();
+
+        $this->assertCount(3, $userItems);
+        $this->assertUser($rawUserList[3], $userItems[0]);
+        $this->assertUser($rawUserList[2], $userItems[1]);
+        $this->assertUser($rawUserList[1], $userItems[2]);
+
+        $userFilter->activationLength = 3;
+
+        $userList = $this->userRepository->findAll($userFilter);
+        $userItems = $userList->toArray();
+
+        $this->assertCount(1, $userItems);
+        $this->assertUser($rawUserList[3], $userItems[0]);
+    }
+
+    private function assertUser(array $expectedUser, array $actualUser): void {
+        $this->assertEquals($expectedUser[0], $actualUser['id']);
+        $this->assertEquals($expectedUser[1], $actualUser['name']);
+        $this->assertEquals($expectedUser[2], $actualUser['surname']);
+        $this->assertEquals($expectedUser[3], $actualUser['email']);
+        $this->assertEquals($expectedUser[4], $actualUser['country']);
+        $this->assertEquals($expectedUser[5]->getTimestamp(), $actualUser['createAt']);
+        $this->assertEquals($expectedUser[6]->getTimestamp(), $actualUser['activateAt']);
+        $this->assertEquals($expectedUser[7], $actualUser['chargerId']);
+    }
+
+    private function orderElementsRepositoryProvider(): array {
+        return [
+            [ 0, 'B', 'B', 'b_b@email.com', 'ES', (new \DateTime('now'))->modify('-1 day'), new \DateTime('now'), 0 ],
+            [ 1, 'B', 'A', 'b_a@email.com', 'EN', (new \DateTime('now'))->modify('-2 day'), new \DateTime('now'), 1 ],
+            [ 2, 'A', 'B', 'a_b@email.com', 'ES', (new \DateTime('now'))->modify('-2 day'), new \DateTime('now'), 2 ],
+            [ 3, 'A', 'A', 'a_a@email.com', 'EN', (new \DateTime('now'))->modify('-365 day'), new \DateTime('now'), 3 ]
+        ];
+    }
+
+    private function populateUserRepository(array $rawUserList): void {
+        foreach($rawUserList as $rawUser) {
+            $user = new User(
+                $rawUser[0],
+                $rawUser[1],
+                $rawUser[2],
+                $rawUser[3],
+                $rawUser[4],
+                $rawUser[5],
+                $rawUser[6],
+                $rawUser[7]
+            );
+
+            $this->userRepository->addUser($user);
+        }
     }
 
 }

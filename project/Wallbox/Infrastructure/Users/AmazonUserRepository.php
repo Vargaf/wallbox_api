@@ -4,14 +4,20 @@ namespace Wallbox\Infrastructure\Users;
 
 use Wallbox\Domain\Users\Model\User;
 use Wallbox\Domain\Users\Model\UserList;
+use Wallbox\Domain\Users\Model\UserListFilterDTO;
 use Wallbox\Domain\Users\Services\UserRepositoryInterface;
 
 class AmazonUserRepository implements UserRepositoryInterface {
 
-    public function findAll(): UserList
+    public function findAll(UserListFilterDTO $userFilter = null): UserList
     {
         
         $userArray = $this->getUserList();
+        
+        if($this->hasToApplyActivationLenghtFilter($userFilter)) {
+            $userArray = $this->filterByActivationLength($userFilter->activationLength, $userArray);
+        }
+        
         $orderedUserList = $this->orderByNameAndSurname($userArray);
         $userList = new UserList($orderedUserList);
 
@@ -53,6 +59,25 @@ class AmazonUserRepository implements UserRepositoryInterface {
         usort($userList, $orderFunction);
 
         return $userList;
+    }
+
+    private function hasToApplyActivationLenghtFilter(UserListFilterDTO $userFilter = null): bool {
+        return $userFilter && $userFilter->activationLength !== null;
+    }
+
+    private function filterByActivationLength(int $activationLength, array $userList): array {
+
+        $filteredUserList = [];
+        foreach($userList as $user) {
+            /** @var User $user */
+            $actualActivationLength = $user->activateAt()->diff($user->createAt());
+            $diff = intval($actualActivationLength->format('%a')); 
+            if( $diff >= $activationLength ) {
+                $filteredUserList[] = $user;
+            }
+        }
+
+        return $filteredUserList;
     }
 
 }

@@ -13,6 +13,10 @@ class AmazonUserRepositoryMock extends AmazonUserRepository {
         $this->items[] = $user;
     }
 
+    public function clear(): void {
+        $this->items = [];
+    }
+
     protected function getUserList(): array {
         return $this->items;
     }
