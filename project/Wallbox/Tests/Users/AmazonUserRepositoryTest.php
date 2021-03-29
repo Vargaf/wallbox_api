@@ -14,8 +14,7 @@ class AmazonrepositoryTest extends TestCase {
         $this->userRepository = new AmazonUserRepositoryMock();
     }
 
-    protected function tearDown(): void
-    {
+    protected function tearDown(): void {
         $this->userRepository->clear();
     }
 
@@ -34,7 +33,7 @@ class AmazonrepositoryTest extends TestCase {
 
     }
 
-    public function testFilterActivationLenght() {
+    public function testFilterActivationLength() {
         $rawUserList = $this->orderElementsRepositoryProvider();
         $this->populateUserRepository($rawUserList);
 
@@ -58,6 +57,32 @@ class AmazonrepositoryTest extends TestCase {
         $this->assertUser($rawUserList[3], $userItems[0]);
     }
 
+    public function testCountryFilter() {
+        $rawUserList = $this->orderElementsRepositoryProvider();
+        $this->populateUserRepository($rawUserList);
+
+        $userFilter = new UserListFilterDTO();
+        $userFilter->countries = [ 'ES' ];
+
+        $userList = $this->userRepository->findAll($userFilter);
+        $userItems = $userList->toArray();
+
+        $this->assertCount(2, $userItems);
+        $this->assertUser($rawUserList[2], $userItems[0]);
+        $this->assertUser($rawUserList[0], $userItems[1]);
+
+        $userFilter = new UserListFilterDTO();
+        $userFilter->countries = [ 'ES', 'CN' ];
+
+        $userList = $this->userRepository->findAll($userFilter);
+        $userItems = $userList->toArray();
+
+        $this->assertCount(3, $userItems);
+        $this->assertUser($rawUserList[3], $userItems[0]);
+        $this->assertUser($rawUserList[2], $userItems[1]);
+        $this->assertUser($rawUserList[0], $userItems[2]);
+    }
+
     private function assertUser(array $expectedUser, array $actualUser): void {
         $this->assertEquals($expectedUser[0], $actualUser['id']);
         $this->assertEquals($expectedUser[1], $actualUser['name']);
@@ -74,7 +99,7 @@ class AmazonrepositoryTest extends TestCase {
             [ 0, 'B', 'B', 'b_b@email.com', 'ES', (new \DateTime('now'))->modify('-1 day'), new \DateTime('now'), 0 ],
             [ 1, 'B', 'A', 'b_a@email.com', 'EN', (new \DateTime('now'))->modify('-2 day'), new \DateTime('now'), 1 ],
             [ 2, 'A', 'B', 'a_b@email.com', 'ES', (new \DateTime('now'))->modify('-2 day'), new \DateTime('now'), 2 ],
-            [ 3, 'A', 'A', 'a_a@email.com', 'EN', (new \DateTime('now'))->modify('-365 day'), new \DateTime('now'), 3 ]
+            [ 3, 'A', 'A', 'a_a@email.com', 'CN', (new \DateTime('now'))->modify('-365 day'), new \DateTime('now'), 3 ]
         ];
     }
 

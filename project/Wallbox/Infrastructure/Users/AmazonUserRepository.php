@@ -17,6 +17,10 @@ class AmazonUserRepository implements UserRepositoryInterface {
         if($this->hasToApplyActivationLenghtFilter($userFilter)) {
             $userArray = $this->filterByActivationLength($userFilter->activationLength, $userArray);
         }
+
+        if($this->hasToApplyCountriesFilter($userFilter)) {
+            $userArray = $this->filterByCountries($userFilter->countries, $userArray);
+        }
         
         $orderedUserList = $this->orderByNameAndSurname($userArray);
         $userList = new UserList($orderedUserList);
@@ -65,6 +69,10 @@ class AmazonUserRepository implements UserRepositoryInterface {
         return $userFilter && $userFilter->activationLength !== null;
     }
 
+    private function hasToApplyCountriesFilter(UserListFilterDTO $userFilter = null): bool {
+        return $userFilter && count($userFilter->countries) > 0;
+    }
+
     private function filterByActivationLength(int $activationLength, array $userList): array {
 
         $filteredUserList = [];
@@ -73,6 +81,19 @@ class AmazonUserRepository implements UserRepositoryInterface {
             $actualActivationLength = $user->activateAt()->diff($user->createAt());
             $diff = intval($actualActivationLength->format('%a')); 
             if( $diff >= $activationLength ) {
+                $filteredUserList[] = $user;
+            }
+        }
+
+        return $filteredUserList;
+    }
+
+    private function filterByCountries(array $countries, array $userList): array {
+
+        $filteredUserList = [];
+        foreach($userList as $user) {
+            /** @var User $user */
+            if(in_array($user->country(), $countries)) {
                 $filteredUserList[] = $user;
             }
         }
