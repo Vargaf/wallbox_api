@@ -4,5 +4,5 @@
 
 user_list:
     path: /users
-    controller: App\Controller\UsersController:userList
+    controller: App\Controller\Users\UsersController:userList
     methods: GET

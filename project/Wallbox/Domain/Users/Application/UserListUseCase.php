@@ -3,6 +3,7 @@
 namespace Wallbox\Domain\Users\Application;
 
 use WallBox\Domain\Users\Model\UserList;
+use Wallbox\Domain\Users\Model\UserListFilterDTO;
 use Wallbox\Domain\Users\Services\UserRepositoryInterface;
 
 class UserListUseCase {
@@ -12,8 +13,8 @@ class UserListUseCase {
     )
     {}
 
-    public function execute(): UserList {
-        return $this->userRepository->findAll();
+    public function execute(UserListFilterDTO $userListFilter = null): UserList {
+        return $this->userRepository->find($userListFilter);
     }
 
 }

@@ -9,7 +9,7 @@ use Wallbox\Domain\Users\Services\UserRepositoryInterface;
 
 class AmazonUserRepository implements UserRepositoryInterface {
 
-    public function findAll(UserListFilterDTO $userFilter = null): UserList
+    public function find(UserListFilterDTO $userFilter = null): UserList
     {
         
         $userArray = $this->getUserList();

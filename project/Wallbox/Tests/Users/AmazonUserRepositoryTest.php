@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Wallbox\Domain\Users\Model\User;
 use Wallbox\Domain\Users\Model\UserListFilterDTO;
 
-class AmazonrepositoryTest extends TestCase {
+class AmazonUserRepositoryTest extends TestCase {
 
     private AmazonUserRepositoryMock $userRepository;
 
@@ -23,8 +23,8 @@ class AmazonrepositoryTest extends TestCase {
         $rawUserList = $this->orderElementsRepositoryProvider();
         $this->populateUserRepository($rawUserList);
 
-        $userList = $this->userRepository->findAll();
-        $userItems = $userList->toArray();
+        $userList = $this->userRepository->find();
+        $userItems = $userList->getIterator();
 
         $this->assertUser($rawUserList[3], $userItems[0]);
         $this->assertUser($rawUserList[2], $userItems[1]);
@@ -40,8 +40,8 @@ class AmazonrepositoryTest extends TestCase {
         $userFilter = new UserListFilterDTO();
         $userFilter->activationLength = 2;
 
-        $userList = $this->userRepository->findAll($userFilter);
-        $userItems = $userList->toArray();
+        $userList = $this->userRepository->find($userFilter);
+        $userItems = $userList->getIterator();
 
         $this->assertCount(3, $userItems);
         $this->assertUser($rawUserList[3], $userItems[0]);
@@ -50,8 +50,8 @@ class AmazonrepositoryTest extends TestCase {
 
         $userFilter->activationLength = 3;
 
-        $userList = $this->userRepository->findAll($userFilter);
-        $userItems = $userList->toArray();
+        $userList = $this->userRepository->find($userFilter);
+        $userItems = $userList->getIterator();
 
         $this->assertCount(1, $userItems);
         $this->assertUser($rawUserList[3], $userItems[0]);
@@ -64,8 +64,8 @@ class AmazonrepositoryTest extends TestCase {
         $userFilter = new UserListFilterDTO();
         $userFilter->countries = [ 'ES' ];
 
-        $userList = $this->userRepository->findAll($userFilter);
-        $userItems = $userList->toArray();
+        $userList = $this->userRepository->find($userFilter);
+        $userItems = $userList->getIterator();
 
         $this->assertCount(2, $userItems);
         $this->assertUser($rawUserList[2], $userItems[0]);
@@ -73,8 +73,8 @@ class AmazonrepositoryTest extends TestCase {
 
         $userFilter->countries = [ 'ES', 'CN' ];
 
-        $userList = $this->userRepository->findAll($userFilter);
-        $userItems = $userList->toArray();
+        $userList = $this->userRepository->find($userFilter);
+        $userItems = $userList->getIterator();
 
         $this->assertCount(3, $userItems);
         $this->assertUser($rawUserList[3], $userItems[0]);
@@ -91,22 +91,22 @@ class AmazonrepositoryTest extends TestCase {
         $userFilter->countries = [ 'ES' ];
         $userFilter->activationLength = 2;
 
-        $userList = $this->userRepository->findAll($userFilter);
-        $userItems = $userList->toArray();
+        $userList = $this->userRepository->find($userFilter);
+        $userItems = $userList->getIterator();
 
         $this->assertCount(1, $userItems);
         $this->assertUser($rawUserList[2], $userItems[0]);
     }
 
-    private function assertUser(array $expectedUser, array $actualUser): void {
-        $this->assertEquals($expectedUser[0], $actualUser['id']);
-        $this->assertEquals($expectedUser[1], $actualUser['name']);
-        $this->assertEquals($expectedUser[2], $actualUser['surname']);
-        $this->assertEquals($expectedUser[3], $actualUser['email']);
-        $this->assertEquals($expectedUser[4], $actualUser['country']);
-        $this->assertEquals($expectedUser[5]->getTimestamp(), $actualUser['createAt']);
-        $this->assertEquals($expectedUser[6]->getTimestamp(), $actualUser['activateAt']);
-        $this->assertEquals($expectedUser[7], $actualUser['chargerId']);
+    private function assertUser(array $expectedUser, User $actualUser): void {
+        $this->assertEquals($expectedUser[0], $actualUser->id());
+        $this->assertEquals($expectedUser[1], $actualUser->name());
+        $this->assertEquals($expectedUser[2], $actualUser->surname());
+        $this->assertEquals($expectedUser[3], $actualUser->email());
+        $this->assertEquals($expectedUser[4], $actualUser->country());
+        $this->assertEquals($expectedUser[5], $actualUser->createAt());
+        $this->assertEquals($expectedUser[6], $actualUser->activateAt());
+        $this->assertEquals($expectedUser[7], $actualUser->chargerId());
     }
 
     private function orderElementsRepositoryProvider(): array {

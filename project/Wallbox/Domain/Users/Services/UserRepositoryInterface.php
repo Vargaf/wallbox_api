@@ -7,6 +7,6 @@ use Wallbox\Domain\Users\Model\UserListFilterDTO;
 
 interface UserRepositoryInterface {
 
-    public function findAll(UserListFilterDTO $userFilter = null): UserList;
+    public function find(UserListFilterDTO $userFilter = null): UserList;
 
 }
